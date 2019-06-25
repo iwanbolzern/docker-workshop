@@ -1,0 +1,32 @@
+# get latest LTS version of node from https://hub.docker.com/_/node/
+FROM node:11-alpine
+
+# Create app directory
+WORKDIR /tmp
+
+# Clone terminall-app and build it
+RUN apk update && apk add --no-cache bash git openssh
+RUN git clone https://gitlab+deploy-token-1:XXXX@git.ihomelab.ch/we-know-you/terminal-app.git .
+RUN npm install
+RUN $(npm bin)/ng build --prod
+
+# create flask container
+FROM python:3.7
+
+# setup timezone
+ENV TZ=Europe/Zurich
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+WORKDIR /app
+
+# install flask application
+COPY . .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# copy previously build terminal-app
+COPY --from=0 /tmp/dist/terminal-app/ src/terminal_app/public/
+
+# run application
+WORKDIR /app/src
+EXPOSE 5000
+CMD ["gunicorn", "--worker-class", "gevent", "-w", "1", "-b", "0.0.0.0:5000", "__init__:app"]

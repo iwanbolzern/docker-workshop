@@ -1,0 +1,28 @@
+version: '3'
+services:
+  accesscounter-iwan:
+    image: nexus.ihomelab.ch:5000/docker-workshop/accesscounter-iwan:0.0.2
+    ports:
+      - 80:80/tcp
+    volumes:
+      - accesscounter-v1:/app/data
+  accesscounter-wma:
+    image: nexus.ihomelab.ch:5000/docker-workshop/accesscounter-wma:0.0.2
+    ports:
+      - 81:80/tcp
+    volumes:
+      - accesscounter-v2:/app/data
+  accesscounter-kir:
+    image: nexus.ihomelab.ch:5000/docker-workshop/accesscounter-kir:0.0.3
+    ports:
+      - 82:80/tcp
+    volumes:
+      - accesscounter-v3:/app/data
+
+volumes:
+  accesscounter-v1:
+    external: false
+  accesscounter-v2:
+    external: false
+  accesscounter-v3:
+    external: false
